@@ -21,15 +21,20 @@ a,
   }
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+@font-face {
+  font-family: 'SFPro';
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local('SFPro'),
+    url('../assets/fonts/SFProDisplay-Regular.woff') format('woff');
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+@font-face {
+  font-family: 'SFUIText';
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local('SFPro'),
+    url('../assets/fonts/SFUIText-Regular.woff') format('woff');
 }
