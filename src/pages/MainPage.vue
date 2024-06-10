@@ -3,11 +3,67 @@ import { ref, onMounted } from 'vue';
 import type { Product, Materials } from '../types/index';
 import items from '../sources/items.json';
 import materials from '../sources/materials.json';
+import { useGoodsStore } from '../stores/goods';
 
+const goodsStore = useGoodsStore();
 const container = ref<Product[]>(items);
 const material = ref<Materials[]>(materials);
+const selectedPrice = ref<string>('0');
+const selectedMaterial = ref<string>('0');
+const temporaryProductsStorage = ref<Product[]>(items);
 
-onMounted(() => {});
+const saveToBoxHandler = (id: string) => {
+  const good = container.value.find((good: Product) => good.id === id);
+  if (good) {
+    goodsStore.saveGoodToBoxHandler(good);
+  }
+};
+
+const saveToFavoritesHandler = (id: string) => {
+  const good = container.value.find((good: Product) => good.id === id);
+  if (good) {
+    goodsStore.saveGoodToFavoritesHandler(good);
+  }
+};
+
+const deleteFromBoxHandler = (id: string) => {
+  goodsStore.deleteInBoxHandler(id);
+};
+
+const deleteFromFavoritesHandler = (id: string) => {
+  goodsStore.deleteInFavoritesHandler(id);
+};
+
+const sortByAscendingPrice = () => {
+  container.value.sort(
+    (product1, product2) =>
+      product1.price.current_price - product2.price.current_price,
+  );
+};
+
+const sortByDescendingPrice = () => {
+  container.value.sort(
+    (product1, product2) =>
+      product2.price.current_price - product1.price.current_price,
+  );
+};
+
+const sortByPrice = () => {
+  if (selectedPrice.value === '1') {
+    sortByAscendingPrice();
+  }
+  if (selectedPrice.value === '2') {
+    sortByDescendingPrice();
+  }
+};
+
+const sortByMaterial = () => {
+  container.value = temporaryProductsStorage.value;
+  container.value = container.value.filter(
+    (product) => product.material === Number(selectedMaterial.value),
+  );
+  sortByPrice();
+};
 </script>
 
 <template>
@@ -24,15 +80,25 @@ onMounted(() => {});
     <article class="filtr">
       <div class="filtr__left">
         <p class="paragraph-design">Сортировать по:</p>
-        <select class="select-design">
-          <option>Цена по возрастанию</option>
-          <option>Цена по убыванию</option>
+        <select
+          class="select-design"
+          @change="sortByPrice"
+          v-model="selectedPrice"
+        >
+          <option value="0" disabled hidden>Сортировка по цене</option>
+          <option value="1">Цена по возрастанию</option>
+          <option value="2">Цена по убыванию</option>
         </select>
       </div>
       <div class="filtr__right">
         <p class="paragraph-design">Материал:</p>
-        <select class="select-design">
-          <option v-for="item in material" :key="item.id">
+        <select
+          class="select-design"
+          @change="sortByMaterial"
+          v-model="selectedMaterial"
+        >
+          <option value="0" disabled hidden>Сортировка по материалу</option>
+          <option v-for="item in material" :key="item.id" :value="item.id">
             {{ item.name }}
           </option>
         </select>
@@ -41,14 +107,59 @@ onMounted(() => {});
     <main class="main-component">
       <article
         class="main-component__good"
-        v-for="item in items"
+        v-for="item in container"
         :key="item.id"
       >
         <div class="main-component__discount" v-if="item.code == 'L422WH'">
           Скидка
         </div>
-        <div class="main-component__code" v-if="item.code != null"></div>
+        <div class="main-component__code" v-if="item.code != null">
+          {{ item.code }}
+        </div>
+        <div class="main-component__title">{{ item.name }}</div>
         <img :src="item.image.url" alt="goods" />
+        <div class="main-component__price">
+          <span
+            class="main-component__price__old"
+            v-if="item.price.old_price != null"
+            >{{ Math.round(item.price.old_price) }}</span
+          >
+          <span class="main-component__price__new">{{
+            Math.round(item.price.current_price)
+          }}</span>
+        </div>
+        <span
+          v-if="!goodsStore.boxContainsGood(item.id)"
+          @click="saveToBoxHandler(item.id)"
+          class="main-component__icons__left"
+          title="добавить в корзину"
+        >
+          <img src="../assets/icons/box.svg" alt="box" />
+        </span>
+        <span
+          v-if="goodsStore.boxContainsGood(item.id)"
+          @click="deleteFromBoxHandler(item.id)"
+          class="main-component__icons__left"
+          title="удалить из корзины"
+        >
+          <img src="../assets/icons/selected.svg" alt="box" />
+        </span>
+        <span
+          v-if="!goodsStore.favoritesContainsGood(item.id)"
+          @click="saveToFavoritesHandler(item.id)"
+          class="main-component__icons__right"
+          title="добавить в избранное"
+        >
+          <img src="../assets/icons/heart.svg" alt="favorites" />
+        </span>
+        <span
+          v-if="goodsStore.favoritesContainsGood(item.id)"
+          @click="deleteFromFavoritesHandler(item.id)"
+          class="main-component__icons__right"
+          title="удалить из избранного"
+        >
+          <img src="../assets/icons/selected.svg" alt="box" />
+        </span>
       </article>
     </main>
   </div>
@@ -150,5 +261,97 @@ img {
 }
 
 .main-component__code {
+  color: rgba(136, 136, 136, 1);
+  font-family: 'SFUIText';
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 14px;
+  position: absolute;
+  top: 269px;
+  left: 12.19px;
+}
+
+.main-component__title {
+  position: absolute;
+  top: 290px;
+  left: 12px;
+  font-family: 'SFUIText';
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 22.4px;
+  color: rgba(0, 0, 0, 1);
+}
+
+.main-component__price {
+  position: absolute;
+  top: 322px;
+  left: 12px;
+}
+
+.main-component__price__old {
+  text-decoration: line-through;
+  color: rgba(136, 136, 136, 1);
+  line-height: 22.4px;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: 'SFUIText';
+  margin-right: 12px;
+}
+
+.main-component__price__new {
+  color: rgba(0, 0, 0, 1);
+  font-family: 'SFUIText';
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22.4px;
+}
+
+.main-component__icons__left img,
+.main-component__icons__right img {
+  width: 21.6px;
+  height: 21.6px;
+}
+
+.main-component__icons__left {
+  position: absolute;
+  top: 312px;
+  left: 239px;
+  cursor: pointer;
+}
+
+.main-component__icons__right {
+  position: absolute;
+  top: 312px;
+  left: 286px;
+  cursor: pointer;
+}
+
+@media (max-width: 840px) {
+  .main-component__good {
+    width: 320px;
+    margin: 47px 10px 0px 0px;
+  }
+}
+
+@media (max-width: 720px) {
+  .main-component__good {
+    width: 320px;
+    margin: 47px auto 0px;
+  }
+}
+
+@media (max-width: 470px) {
+  .main-component__good {
+    width: 320px;
+  }
+  .main-component__icons__left {
+    top: 312px;
+    left: 189px;
+  }
+
+  .main-component__icons__right {
+    top: 312px;
+    left: 226px;
+  }
 }
 </style>
