@@ -71,9 +71,7 @@ const sortByMaterial = () => {
     <header class="header">
       <nav class="header__navigation">
         Главная / Системы хранения /
-        <span class="header__navigation__bold"
-          >Комплекты стеллажных систем</span
-        >
+        <span class="header__bold">Комплекты стеллажных систем</span>
       </nav>
       <p class="header__title">Комплекты стеллажных систем</p>
     </header>
@@ -120,18 +118,18 @@ const sortByMaterial = () => {
         <img :src="item.image.url" alt="goods" />
         <div class="main-component__price">
           <span
-            class="main-component__price__old"
+            class="main-component__price-old"
             v-if="item.price.old_price != null"
             >{{ Math.round(item.price.old_price) }}</span
           >
-          <span class="main-component__price__new">{{
+          <span class="main-component__price-new">{{
             Math.round(item.price.current_price)
           }}</span>
         </div>
         <span
           v-if="!goodsStore.boxContainsGood(item.id)"
           @click="saveToBoxHandler(item.id)"
-          class="main-component__icons__left"
+          class="main-component__icons-left"
           title="добавить в корзину"
         >
           <img src="../assets/icons/box.svg" alt="box" />
@@ -139,7 +137,7 @@ const sortByMaterial = () => {
         <span
           v-if="goodsStore.boxContainsGood(item.id)"
           @click="deleteFromBoxHandler(item.id)"
-          class="main-component__icons__left"
+          class="main-component__icons-left"
           title="удалить из корзины"
         >
           <img src="../assets/icons/selected.svg" alt="box" />
@@ -147,7 +145,7 @@ const sortByMaterial = () => {
         <span
           v-if="!goodsStore.favoritesContainsGood(item.id)"
           @click="saveToFavoritesHandler(item.id)"
-          class="main-component__icons__right"
+          class="main-component__icons-right"
           title="добавить в избранное"
         >
           <img src="../assets/icons/heart.svg" alt="favorites" />
@@ -155,7 +153,7 @@ const sortByMaterial = () => {
         <span
           v-if="goodsStore.favoritesContainsGood(item.id)"
           @click="deleteFromFavoritesHandler(item.id)"
-          class="main-component__icons__right"
+          class="main-component__icons-right"
           title="удалить из избранного"
         >
           <img src="../assets/icons/selected.svg" alt="box" />
@@ -183,7 +181,7 @@ const sortByMaterial = () => {
   margin-top: 32px;
 }
 
-.header__navigation__bold {
+.header__bold {
   font-weight: bold;
 }
 
@@ -288,7 +286,7 @@ img {
   left: 12px;
 }
 
-.main-component__price__old {
+.main-component__price-old {
   text-decoration: line-through;
   color: rgba(136, 136, 136, 1);
   line-height: 22.4px;
@@ -298,7 +296,7 @@ img {
   margin-right: 12px;
 }
 
-.main-component__price__new {
+.main-component__price-new {
   color: rgba(0, 0, 0, 1);
   font-family: 'SFUIText';
   font-weight: 400;
@@ -306,20 +304,20 @@ img {
   line-height: 22.4px;
 }
 
-.main-component__icons__left img,
-.main-component__icons__right img {
+.main-component__icons-left img,
+.main-component__icons-right img {
   width: 21.6px;
   height: 21.6px;
 }
 
-.main-component__icons__left {
+.main-component__icons-left {
   position: absolute;
   top: 312px;
   left: 239px;
   cursor: pointer;
 }
 
-.main-component__icons__right {
+.main-component__icons-right {
   position: absolute;
   top: 312px;
   left: 286px;
@@ -344,12 +342,12 @@ img {
   .main-component__good {
     width: 320px;
   }
-  .main-component__icons__left {
+  .main-component__icons-left {
     top: 312px;
     left: 189px;
   }
 
-  .main-component__icons__right {
+  .main-component__icons-right {
     top: 312px;
     left: 226px;
   }
